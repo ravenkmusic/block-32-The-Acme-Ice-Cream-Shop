@@ -9,11 +9,23 @@ const app = express();
 app.use(express.json());
 
 //logs incoming requests
-app.use(require('morgan')(dev));
+app.use(require('morgan')('dev'));
 
 //crud routes
 
-//get
+//get all flavors
+app.get('/api/flavors', async (req, res, next) => {
+    try {
+        const SQL = `
+            SELECT * FROM flavors
+        `;
+        const response = await client.query(SQL);
+        res.send(response.rows);
+    } catch (error) {
+        next(error);
+    }
+})
+//get single flavor
 //post
 //put 
 //delete
