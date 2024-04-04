@@ -26,9 +26,63 @@ app.get('/api/flavors', async (req, res, next) => {
     }
 })
 //get single flavor
+app.get('/api/flavors/:id', async (req, res, next) => {
+    try {
+        const SQL = `
+            SELECT * FROM flavors
+            WHERE id = $1
+        `;
+        const response = await client.query(SQL, [req.params.id]);
+        res.send(response.rows);
+    } catch (error) {
+        next(error);
+    }
+});
+
 //post
-//put 
+app.post('/api/flavors', async (req, res, next) => {
+    try {
+        const SQL = `
+            INSERT INTO flavors (name, is_favorite)
+            VALUES ($1, $2)
+            RETURNING *
+        `;
+        const response = await client.query(SQL, [req.body.name, req.body.is_favorite]);
+        res.send(response.rows[0]);
+    } catch (error) {
+        next(error);
+    }
+});
+
+//put
+app.put('/api/flavors/:id', async (req, res, next) => {
+    try {
+        const SQL = `
+            UPDATE flavors
+            SET name = $1, is_favorite= $2, updated_at = now()
+            WHERE id= $3
+            RETURNING *
+            `;
+            const response = await client.query(SQL, [req.body.name, req.body.is_favorite, req.params.id]);
+            res.send(response.rows[0]);
+    } catch (error) {
+        next(error);
+    }
+});
+
 //delete
+app.delete('/api/flavors/:id', async (req, res, next) => {
+    try {
+        const SQL = `
+        DELETE from flavors
+        WHERE id = $1
+        `;
+        const response = await client.query(SQL, [req.params.id]);
+        res.sendStatus(204);
+    } catch (error) {
+        next(error);
+    }
+});
 
 //database connection
 
@@ -43,7 +97,7 @@ const init = async() => {
         CREATE TABLE flavors(
             id SERIAL PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
-            is_favorite BOOLEAN DEFAULT FALSE,
+            is_favorite BOOLEAN DEFAULT FALSE NOT NULL,
             created_at TIMESTAMP DEFAULT now(),
             updated_at TIMESTAMP DEFAULT now()
         )
